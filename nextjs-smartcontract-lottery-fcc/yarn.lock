@@ -1815,7 +1815,7 @@
     "@web3uikit/styles" "*"
     react-router-dom "^6.3.0"
 
-"@web3uikit/icons@*":
+"@web3uikit/icons@*", "@web3uikit/icons@^0.2.20":
   version "0.2.20"
   resolved "https://registry.yarnpkg.com/@web3uikit/icons/-/icons-0.2.20.tgz#89a386d5d39543b85bfaf4734da199940a887159"
   integrity sha512-+XYsI0gmcY79b9DVcsRnj7ZlblwEOnUeqkcMvz1t1ou3LGE7cJhDzlV+PezjI+DucjZtYDKbKGuVTdQjgqfyXg==

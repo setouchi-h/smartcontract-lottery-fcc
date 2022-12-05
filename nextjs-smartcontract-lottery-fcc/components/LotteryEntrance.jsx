@@ -12,6 +12,8 @@ export default function LotteryEntrance() {
     const chainId = parseInt(chainIdHex)
     const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
     const [entranceFee, setEntranceFee] = useState("0")
+    const [numPlayers, setNumplayers] = useState("0")
+    const [recentWinner, setRecentWinner] = useState("0")
 
     const dispatch = useNotification()
 
@@ -30,29 +32,53 @@ export default function LotteryEntrance() {
         params: {},
     })
 
+    const { runContractFunction: getNumberOfPlayers } = useWeb3Contract({
+        abi,
+        contractAddress: raffleAddress,
+        functionName: "getNumberOfPlayers",
+        params: {},
+    })
+
+    const { runContractFunction: getRecentWinner } = useWeb3Contract({
+        abi,
+        contractAddress: raffleAddress,
+        functionName: "getRecentWinner",
+        params: {},
+    })
+
+    async function updateUI() {
+        const entranceFeeFromCall = (await getEntranceFee()).toString()
+        const numPlayersFromCall = (await getNumberOfPlayers()).toString()
+        const recentWinnerFromCall = await getRecentWinner()
+        setEntranceFee(entranceFeeFromCall)
+        setNumplayers(numPlayersFromCall)
+        setRecentWinner(recentWinnerFromCall)
+    }
+
     useEffect(() => {
         if (isWeb3Enabled) {
             // try to read the raffle entrance fee
-            async function updateUI() {
-                const entranceFeeFromCall = (await getEntranceFee()).toString()
-                setEntranceFee(entranceFeeFromCall)
-            }
             updateUI()
         }
     }, [isWeb3Enabled])
 
     const handleSuccess = async (tx) => {
-        await tx.wait(1)
-        handleNewNotification(tx)
+        try {
+            await tx.wait(1)
+            handleNewNotification(tx)
+            updateUI()
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     const handleNewNotification = () => {
         dispatch({
             type: "info",
             message: "Transaction Complete!",
-            title: "Tx Notification",
+            title: "Transaction Notification",
             position: "topR",
-            icon: "bell",
+            // icon: "bell",
         })
     }
 
@@ -62,16 +88,20 @@ export default function LotteryEntrance() {
             {raffleAddress ? (
                 <div>
                     <button
-                        onClick={async () => {
+                        onClick={async () =>
                             await enterRaffle({
+                                // onComplete:
+                                // onError:
                                 onSuccess: handleSuccess,
                                 onError: (error) => console.log(error),
                             })
-                        }}
+                        }
                     >
                         Enter Raffle
                     </button>
                     Entrance Fee: {ethers.utils.formatUnits(entranceFee, "ether")} ETH
+                    Players: {numPlayers}
+                    Recent Winner: {recentWinner}
                 </div>
             ) : (
                 <div>No Raffle Address Detected</div>
