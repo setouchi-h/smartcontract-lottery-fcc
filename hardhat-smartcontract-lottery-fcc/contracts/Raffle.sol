@@ -124,6 +124,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     function fulfillRandomWords(uint256 /* requestId */, uint256[] memory randomWords) internal override {
+        // chainlink node call this function
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
